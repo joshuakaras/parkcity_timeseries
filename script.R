@@ -191,6 +191,39 @@ accuracy(arimalog.fcast, log2)
 
 
 
+#### ETS Model of Log Data ####
+# What if we want to capture a multiplicative seasonal pattern instead of additive
+etslog <- ets(log1)
+summary(etslog)
+# Single smooth (very small gamma and beta)
+
+png("etslog_plot.png", width = 1600, height = 900)
+autoplot(log1, lwd = 1, alpha = 0.4) + 
+  ggtitle("Exponential Smoothing Model of Log Air Passengers") + 
+  xlab("Year") + 
+  ylab("Log Air Passengers") + 
+  my_theme +
+  autolayer(etslog$fitted, lwd = 0.75, color = "red")
+dev.off()
+# Looks good! 
+
+etslog.fcast <- forecast(etslog, h = 24)
+
+png("etslog_forecast.png", width = 1600, height = 900)
+autoplot(log1, lwd = 1, alpha = 0.4) + 
+  ggtitle("Exponential Smoothing Forecast of Log Air Passengers") + 
+  xlab("Year") + 
+  ylab("Log Air Passengers") + 
+  my_theme +
+  autolayer(etslog.fcast, lwd = 0.75, color = "red", "Forecast") + 
+  autolayer(log2, lwd = 1, color = "black", series = "Data")
+dev.off()
+
+accuracy(etslog.fcast, log2)
+####
+
+
+
 #### Accuracy of Each Method ####
 tribble(~type, ~theil_u,
        #--/--
@@ -198,7 +231,8 @@ tribble(~type, ~theil_u,
        "ets", accuracy(ets.fcast, data2)[2,8],
        "stl", accuracy(stl.fcast, data2)[2,8],
        "arima", accuracy(arima.fcast, data2)[2,8],
-       "arima log", accuracy(arimalog.fcast, log2)[2,8]
+       "arima log", accuracy(arimalog.fcast, log2)[2,8],
+       "ets log", accuracy(etslog.fcast, log2)[2,8]
 )
-# ARIMA of Log Data performs best followed by Linear and ETS
+# ETS of Log Data performs best followed by ARIMA of Log Data, Linear and ETS
 ####
